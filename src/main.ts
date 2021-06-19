@@ -17,6 +17,10 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("extension-profiles.active-profiles-setup",activeProfilesSetupCommand)
 	);
 
+	context.subscriptions.push(
+		vscode.commands.registerCommand("extension-profiles.activate-profile",activateProfileCommand)
+	);
+
 	const config = vscode.workspace.getConfiguration("extension-profiles");
 	if (config.get<boolean>("checkAllActiveProfileExtensionsAreEnabledOnStartup")) {
 		activeProfilesStartupCheck(config);
@@ -173,3 +177,19 @@ function viewExtensionsSearch(extensionIds: string[]) {
 	}
 }
 
+function activateProfileCommand(profileName: string) {
+	const config = vscode.workspace.getConfiguration("extension-profiles");
+
+	if (config.get<Array<string>>("activeProfiles")?.find(p => p == profileName)) {
+		vscode.window.showInformationMessage("Profile '" + profileName + "' is already active");
+		return;
+	}
+
+	if (!config.get<any>("profiles")[profileName]) {
+		vscode.window.showErrorMessage("Profile '" + profileName + "' is not defined");
+		return;
+	}
+
+	profileAction(profileName, true, true, false);
+	vscode.window.showInformationMessage("Profile '" + profileName + "' activated");
+}
