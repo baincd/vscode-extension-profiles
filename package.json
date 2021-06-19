@@ -19,6 +19,42 @@
 		"onStartupFinished"
 	],
 	"main": "./out/main.js",
+	"contributes": {
+		"configuration": {
+			"properties": {
+				"extension-profiles.profiles": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "object",
+						"properties": {
+							"extensions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"description": "Extension ID"
+								},
+								"minItems": 1,
+								"description": "Array of extension IDs that are part of this profile"
+							}
+						},
+						"required": [
+							"extensions"
+						],
+						"description": "Extension Profile name"
+					},
+					"description": "Extension Profiles configuration"
+				},
+				"extension-profiles.activeProfiles": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "Extension profile name (must match a extension-profiles.profiles.* value)"
+					},
+					"description": "Active profiles (recommended to be set only on workspace settings)"
+				}
+			}
+		}
+	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
