@@ -166,6 +166,10 @@ function viewExtensionProfilesSettings() {
 }
 
 function viewExtensionsSearch(extensionIds: string[]) {
-	vscode.commands.executeCommand("workbench.extensions.search", extensionIds.join(" "));
+	const extSearchStr = extensionIds.join(" ");
+	vscode.commands.executeCommand("workbench.extensions.search", extSearchStr);
+	if (extSearchStr.length > 200) {
+		vscode.window.showErrorMessage("Not all extensions for profile may be displayed - search string is longer than extension sidebar search supports (200 chars)")
+	}
 }
 
