@@ -8,3 +8,5 @@ out/test/**
 *?.gitignored.?*
 *?.gitignored
 example-files/**
+
+test/ws/**
