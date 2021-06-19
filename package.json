@@ -20,6 +20,12 @@
 	],
 	"main": "./out/main.js",
 	"contributes": {
+		"commands": [
+			{
+				"title": "Extension Profiles: Active Profiles Setup",
+				"command": "extension-profiles.active-profiles-setup"
+			}
+		],
 		"configuration": {
 			"properties": {
 				"extension-profiles.profiles": {
