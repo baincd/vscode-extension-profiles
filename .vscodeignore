@@ -9,4 +9,4 @@ out/test/**
 *?.gitignored
 example-files/**
 
-test/ws/**
+test/**
