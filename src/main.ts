@@ -54,10 +54,64 @@ function activeProfilesSetup() {
 	vscode.window.showQuickPick(options.map(opt => opt.displayName()))
 		.then(selectedDisplayName => {
 			if (selectedDisplayName) {
-				vscode.window.showInformationMessage(options.find(opt => opt.displayName() == selectedDisplayName)?.name + "");
+				const selectedOpt = options.find(opt => opt.displayName() == selectedDisplayName);
+				if (selectedOpt) {
+					profileActionPicker(selectedOpt)
+				}
 			}
 		}
 	)
+}
+
+function profileActionPicker(opt: ProfileQuickPickOption) {
+	let viewAction = "View extensions in " + opt.name + " profile";
+	let activateAction = "Activate " + opt.name + " profile";
+	let deactivateAction = "Deactivate " + opt.name + " profile";
+
+	let options: string[] = [];
+
+	if (opt.exists && !opt.enabled) {
+		options.push(activateAction);
+	}
+	if (opt.exists) {
+		options.push(viewAction);
+	}
+	if (opt.enabled) {
+		options.push(deactivateAction);
+	}
+
+	vscode.window.showQuickPick(options)
+		.then(selectedOption => {
+			switch(selectedOption) {
+				case viewAction: profileAction(opt.name, false, opt.exists, false); break;
+				case activateAction: profileAction(opt.name, true, opt.exists, false); break;
+				case deactivateAction: profileAction(opt.name, false, opt.exists, true); break;
+			}
+		})
+}
+
+function profileAction(profileName: string, activate: boolean, view: boolean, deactivate: boolean) {
+
+	if (activate || deactivate) {
+		const config = vscode.workspace.getConfiguration("extension-profiles");
+		let activeProfiles = config.get<Array<string>>("activeProfiles") || [];
+		if (activate) {
+			activeProfiles.push(profileName);
+		} else if (deactivate) {
+			activeProfiles = activeProfiles.filter(p => p != profileName);
+		}
+	
+
+		config.update("activeProfiles", activeProfiles, vscode.ConfigurationTarget.Workspace)
+			.then(undefined, err => {
+				vscode.window.showWarningMessage("Cannot save active extension profile: " + err);        
+			})
+	}
+
+	if (view) {
+		const extensions = vscode.workspace.getConfiguration("extension-profiles.profiles").get<any>(profileName)["extensions"] as Array<string>;
+		vscode.commands.executeCommand("workbench.extensions.search",extensions.join(" "));
+	}
 }
 
 export function activate(context: vscode.ExtensionContext) {
