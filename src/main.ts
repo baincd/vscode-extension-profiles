@@ -16,6 +16,42 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("extension-profiles.active-profiles-setup",activeProfilesSetupCommand)
 	);
+
+	const config = vscode.workspace.getConfiguration("extension-profiles");
+	if (config.get<boolean>("checkAllActiveProfileExtensionsAreEnabledOnStartup")) {
+		activeProfilesStartupCheck(config);
+	}
+}
+
+const DEFINE_PROFILE_NOW = "Define Profile Now";
+const DEACTIVATE_PROFILE = "Deactivate Profile";
+const ENABLE_EXTENSIONS = "Enable extensions";
+function activeProfilesStartupCheck(config: vscode.WorkspaceConfiguration) {
+	config.get<Array<string>>("activeProfiles")?.forEach(activeProfile => {
+		const profileConfig = config.get<any>("profiles")[activeProfile];
+		if (!profileConfig) {
+			vscode.window.showErrorMessage("Profile '" + activeProfile + "' Not Defined", DEFINE_PROFILE_NOW, DEACTIVATE_PROFILE)
+				.then(selected => {
+					switch(selected) {
+						case DEFINE_PROFILE_NOW: viewExtensionProfilesSettings(); break;
+						case DEACTIVATE_PROFILE: profileAction(activeProfile, false, false, true); break;
+					}
+				})
+			return;
+		}
+
+		let activeProfileExts = profileConfig["extensions"] as Array<string>;
+		let nonEnabledExts = activeProfileExts.filter(ext => !vscode.extensions.getExtension(ext));
+		if (nonEnabledExts.length) {
+			vscode.window.showWarningMessage("Profile '" + activeProfile + "': Not all extensions enabled", ENABLE_EXTENSIONS)
+				.then(selected => {
+					switch(selected) {
+						case ENABLE_EXTENSIONS: viewExtensionsSearch(nonEnabledExts); break;
+					}
+				})
+		}
+
+	});
 }
 
 function activeProfilesSetupCommand() {
@@ -25,7 +61,7 @@ function activeProfilesSetupCommand() {
 		vscode.window.showErrorMessage("No profiles defined!","Define profiles now")
 			.then(btnPressed => { 
 				if (btnPressed) {
-					vscode.commands.executeCommand("workbench.action.openSettings", "extension-profiles.profiles")
+					viewExtensionProfilesSettings();
 				}
 			}
 		)
@@ -121,7 +157,15 @@ function profileAction(profileName: string, activate: boolean, view: boolean, de
 
 	if (view) {
 		const extensions = vscode.workspace.getConfiguration("extension-profiles.profiles").get<any>(profileName)["extensions"] as Array<string>;
-		vscode.commands.executeCommand("workbench.extensions.search",extensions.join(" "));
+		viewExtensionsSearch(extensions);
 	}
+}
+
+function viewExtensionProfilesSettings() {
+	vscode.commands.executeCommand("workbench.action.openSettings", "extension-profiles.profiles");
+}
+
+function viewExtensionsSearch(extensionIds: string[]) {
+	vscode.commands.executeCommand("workbench.extensions.search", extensionIds.join(" "));
 }
 
