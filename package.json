@@ -2,7 +2,7 @@
 	"publisher": "baincd",
 	"name": "extension-profiles",
 	"displayName": "Extension Profiles",
-	"description": "Define profiles of extension, and quickly enable different profiles in different workspaces",
+	"description": "Define sets of extensions that can quickly be enabled in workspaces via settings",
 	"version": "0.0.1",
 	"license": "MIT",
 	"engines": {
