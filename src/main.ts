@@ -12,33 +12,8 @@ class ExtProfile {
 	}
 }
 
-function getExtProfiles() {
-	const config = vscode.workspace.getConfiguration("extension-profiles");
-	let extProfiles: ExtProfile[] = [];
-
-	Object.keys(config.get<any>("profiles")).forEach(key => extProfiles.push(new ExtProfile(key)));
-	config.get<Array<string>>("activeProfiles")?.forEach(key => {
-		let opt = extProfiles.find(opt => opt.name == key);
-		if (opt) {
-			opt.activated = true;
-		} else {
-			const newOpt = new ExtProfile(key);
-			newOpt.exists = false;
-			newOpt.activated = true;
-			extProfiles.push(newOpt);
-		}
-	});
-
-	extProfiles.sort((a, b) => {
-		if (a.activated && !b.activated) {
-			return -1;
-		} else if (!a.activated && b.activated) {
-			return 1;
-		} else {
-			return a.name.localeCompare(b.name);
-		}
-	});
-	return extProfiles;
+export function activate(context: vscode.ExtensionContext) {
+	vscode.commands.registerCommand("extension-profiles.active-profiles-setup",activeProfilesSetupCommand);
 }
 
 function activeProfilesSetupCommand() {
@@ -66,6 +41,35 @@ function activeProfilesSetupCommand() {
 			}
 		}
 	)
+}
+
+function getExtProfiles() {
+	const config = vscode.workspace.getConfiguration("extension-profiles");
+	let extProfiles: ExtProfile[] = [];
+
+	Object.keys(config.get<any>("profiles")).forEach(key => extProfiles.push(new ExtProfile(key)));
+	config.get<Array<string>>("activeProfiles")?.forEach(key => {
+		let opt = extProfiles.find(opt => opt.name == key);
+		if (opt) {
+			opt.activated = true;
+		} else {
+			const newOpt = new ExtProfile(key);
+			newOpt.exists = false;
+			newOpt.activated = true;
+			extProfiles.push(newOpt);
+		}
+	});
+
+	extProfiles.sort((a, b) => {
+		if (a.activated && !b.activated) {
+			return -1;
+		} else if (!a.activated && b.activated) {
+			return 1;
+		} else {
+			return a.name.localeCompare(b.name);
+		}
+	});
+	return extProfiles;
 }
 
 function profileActionPicker(opt: ExtProfile) {
@@ -119,6 +123,3 @@ function profileAction(profileName: string, activate: boolean, view: boolean, de
 	}
 }
 
-export function activate(context: vscode.ExtensionContext) {
-	vscode.commands.registerCommand("extension-profiles.active-profiles-setup",activeProfilesSetupCommand);
-}
