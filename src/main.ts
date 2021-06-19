@@ -13,7 +13,9 @@ class ExtProfile {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-	vscode.commands.registerCommand("extension-profiles.active-profiles-setup",activeProfilesSetupCommand);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("extension-profiles.active-profiles-setup",activeProfilesSetupCommand)
+	);
 }
 
 function activeProfilesSetupCommand() {
