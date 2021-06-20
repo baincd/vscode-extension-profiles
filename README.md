@@ -10,11 +10,11 @@ Extension Profiles provides a workaround (within the limitations of the vscode A
 
 ## Usage
 
-1. Install extensions, then disable them globally
+1: Install extensions, then disable them globally
 
 ![Disable extension globally example](images/disable-ext-globally.png)
 
-2. Define extension profiles in settings.json
+2: Define extension profiles in settings.json
 
 ```jsonc
     "extension-profiles.profiles": {
@@ -34,13 +34,14 @@ Extension Profiles provides a workaround (within the limitations of the vscode A
     },
 ```
 
-3. Use "Extension Profiles: Active Profiles Setup" command to activate profiles in workspace
+3: Use "Extension Profiles: Active Profiles Setup" command to activate profiles in workspace
+
 - The active profiles are saved in workspace settings
 - Extension sidebar will be displayed with the extensions of the profile displayed.  Manually enable each extension for the workspace
 
 ![Activate Profile Example](images/activate-profile-example.png)
 
-4. If all the workspace's active profile(s) extensions are not enabled (for example, if you add a new extension to a profile), you will be prompted at startup to enable those extensions 
+4: If all the workspace's active profile(s) extensions are not enabled (for example, if you add a new extension to a profile), you will be prompted at startup to enable those extensions 
 
 ![Startup Check Image](images/startup-check-example.png)
 
