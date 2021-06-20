@@ -55,7 +55,25 @@ function activeProfilesStartupCheck(config: vscode.WorkspaceConfiguration) {
 				})
 		}
 
+		popupActiveProfileDisabledExts(profileConfig["disabledExtensions"] as Array<string>|undefined , activeProfile);
+
 	});
+}
+
+const DISABLE_EXTENSIONS = "Disable Extensions";
+function popupActiveProfileDisabledExts(activeProfileDisabledExts: Array<string>|undefined, activeProfile: string) {
+	if (!activeProfileDisabledExts) {
+		return;
+	}
+	let needToBeDisabledExts = activeProfileDisabledExts.filter(ext => vscode.extensions.getExtension(ext));
+	if (needToBeDisabledExts.length) {
+		vscode.window.showWarningMessage("Profile '" + activeProfile + "': extensions need to be DISABLED",DISABLE_EXTENSIONS)
+		.then(selected => {
+			if (selected == DISABLE_EXTENSIONS) {
+				viewExtensionsSearch(needToBeDisabledExts);
+			}
+		})
+	}
 }
 
 function activeProfilesSetupCommand() {
@@ -143,8 +161,8 @@ function profileActionPicker(opt: ExtProfile) {
 
 function profileAction(profileName: string, activate: boolean, view: boolean, deactivate: boolean) {
 
+	const config = vscode.workspace.getConfiguration("extension-profiles");
 	if (activate || deactivate) {
-		const config = vscode.workspace.getConfiguration("extension-profiles");
 		let activeProfiles = config.get<Array<string>>("activeProfiles") || [];
 		if (activate) {
 			activeProfiles.push(profileName);
@@ -160,7 +178,11 @@ function profileAction(profileName: string, activate: boolean, view: boolean, de
 	}
 
 	if (view) {
-		const extensions = vscode.workspace.getConfiguration("extension-profiles.profiles").get<any>(profileName)["extensions"] as Array<string>;
+		const profileConfig = vscode.workspace.getConfiguration("extension-profiles.profiles").get<any>(profileName);
+		if (!deactivate) {
+			popupActiveProfileDisabledExts(profileConfig["disabledExtensions"] as Array<string>|undefined , profileName);
+		}
+		const extensions = profileConfig["extensions"] as Array<string>;
 		viewExtensionsSearch(extensions);
 	}
 }

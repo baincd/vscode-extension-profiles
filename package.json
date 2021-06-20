@@ -41,6 +41,14 @@
 								},
 								"minItems": 1,
 								"description": "Array of extension IDs that are part of this profile"
+							},
+							"disabledExtensions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"description": "Extension ID"
+								},
+								"description": "Array of extension IDs that should be disabled with this profile is active"
 							}
 						},
 						"required": [
