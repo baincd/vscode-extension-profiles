@@ -3,7 +3,7 @@
 	"name": "extension-profiles",
 	"displayName": "Extension Profiles",
 	"description": "Define sets of extensions that can quickly be enabled in workspaces via settings",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"license": "MIT",
 	"engines": {
 		"vscode": "^1.32.0"
