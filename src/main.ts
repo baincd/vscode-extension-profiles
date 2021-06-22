@@ -1,6 +1,22 @@
 import * as vscode from 'vscode';
 
-class ExtProfile {
+///// Types
+interface ProfileConfig {
+	extensions: Array<string>
+	disabledExtensions?: Array<string>
+}
+
+interface ProfilesConfig {
+	[key: string]: ProfileConfig;
+}
+
+interface Config {
+	profiles: ProfilesConfig
+	activeProfiles: Array<string>
+	checkAllActiveProfileExtensionsAreEnabledOnStartup: boolean
+}
+
+class ProfileRef {
 	name: string;
 	activated = false;
 	exists = true;
@@ -12,6 +28,7 @@ class ExtProfile {
 	}
 }
 
+///// activate method
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("extension-profiles.active-profiles-setup",activeProfilesSetupCommand)
@@ -21,63 +38,91 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("extension-profiles.activate-profile",activateProfileCommand)
 	);
 
-	const config = vscode.workspace.getConfiguration("extension-profiles");
-	if (config.get<boolean>("checkAllActiveProfileExtensionsAreEnabledOnStartup")) {
+	const config = getConfig();
+	if (config.checkAllActiveProfileExtensionsAreEnabledOnStartup) {
 		activeProfilesStartupCheck(config);
 	}
 }
 
-const DEFINE_PROFILE_NOW = "Define Profile Now";
-const DEACTIVATE_PROFILE = "Deactivate Profile";
-const ENABLE_EXTENSIONS = "Show Extensions to Enable";
-function activeProfilesStartupCheck(config: vscode.WorkspaceConfiguration) {
-	config.get<Array<string>>("activeProfiles")?.forEach(activeProfile => {
-		const profileConfig = config.get<any>("profiles")[activeProfile];
-		if (!profileConfig) {
-			vscode.window.showErrorMessage("Profile '" + activeProfile + "' Not Defined", DEFINE_PROFILE_NOW, DEACTIVATE_PROFILE)
-				.then(selected => {
-					switch(selected) {
-						case DEFINE_PROFILE_NOW: viewExtensionProfilesSettings(); break;
-						case DEACTIVATE_PROFILE: profileAction(activeProfile, false, false, true); break;
-					}
-				})
+
+///// Commands and Events
+function activeProfilesStartupCheck(config: Config) {
+	config.activeProfiles?.forEach(activeProfileName => {
+		const activeProfileConfig = config.profiles[activeProfileName];
+		if (!activeProfileConfig) {
+			showActiveProfileDoesNotExistPopup(activeProfileName);
 			return;
 		}
 
-		let activeProfileExts = profileConfig["extensions"] as Array<string>;
-		let nonEnabledExts = activeProfileExts.filter(ext => !vscode.extensions.getExtension(ext));
-		if (nonEnabledExts.length) {
-			vscode.window.showWarningMessage("Profile '" + activeProfile + "': Not all extensions enabled", ENABLE_EXTENSIONS)
-				.then(selected => {
-					switch(selected) {
-						case ENABLE_EXTENSIONS: viewExtensionsSearch(nonEnabledExts, activeProfile, "enable"); break;
-					}
-				})
+		let extsNeedEnabled = activeProfileConfig.extensions.filter(extNotEnabled);
+		if (extsNeedEnabled.length) {
+			showExtsNeedEnabledPopup(extsNeedEnabled, activeProfileName);
 		}
 
-		popupActiveProfileDisabledExts(profileConfig["disabledExtensions"] as Array<string>|undefined , activeProfile);
-
+		let extsNeedDisabled = activeProfileConfig.disabledExtensions?.filter(extEnabled)
+		if (extsNeedDisabled?.length) {
+			showExtsNeedDisabledPopup(extsNeedDisabled, activeProfileName);
+		}
 	});
 }
 
-const DISABLE_EXTENSIONS = "Show Extensions to Disable";
-function popupActiveProfileDisabledExts(activeProfileDisabledExts: Array<string>|undefined, activeProfile: string) {
-	if (!activeProfileDisabledExts) {
-		return;
-	}
-	let needToBeDisabledExts = activeProfileDisabledExts.filter(ext => vscode.extensions.getExtension(ext));
-	if (needToBeDisabledExts.length) {
-		vscode.window.showWarningMessage("Profile '" + activeProfile + "': extensions need to be DISABLED",DISABLE_EXTENSIONS)
-		.then(selected => {
-			if (selected == DISABLE_EXTENSIONS) {
-				viewExtensionsSearch(needToBeDisabledExts, activeProfile, "disable");
-			}
-		})
-	}
+
+///// Configuration getters
+function getConfig(): Config {
+	return vscode.workspace.getConfiguration().get<Config>("extension-profiles")
+		|| {
+			activeProfiles: [],
+			checkAllActiveProfileExtensionsAreEnabledOnStartup: false,
+			profiles: {}
+		};
 }
 
+
+///// Popup Messages
+function showExtsNeedEnabledPopup(extsNeedEnabled: string[], profileName: string) {
+	vscode.window.showWarningMessage("Profile '" + profileName + "': Not all extensions enabled", ENABLE_EXTENSIONS)
+		.then(selected => {
+			switch (selected) {
+				case ENABLE_EXTENSIONS: viewExtensionsSearch(extsNeedEnabled, profileName, "enable"); break;
+			}
+		});
+}
+function showExtsNeedDisabledPopup(needToBeDisabledExts: string[], profileName: string) {
+	vscode.window.showWarningMessage("Profile '" + profileName + "': extensions need to be DISABLED", DISABLE_EXTENSIONS)
+		.then(selected => {
+			if (selected == DISABLE_EXTENSIONS) {
+				viewExtensionsSearch(needToBeDisabledExts, profileName, "disable");
+			}
+		});
+}
+
+function showActiveProfileDoesNotExistPopup(activeProfile: string) {
+	vscode.window.showErrorMessage("Profile '" + activeProfile + "' Not Defined", DEFINE_PROFILE_NOW, DEACTIVATE_PROFILE)
+		.then(selected => {
+			switch (selected) {
+				case DEFINE_PROFILE_NOW: viewExtensionProfilesSettings(); break;
+				case DEACTIVATE_PROFILE: profileAction(activeProfile, false, false, true); break;
+			}
+		});
+}
+
+
+///// Filters
+const extNotEnabled = (ext: string): boolean => !vscode.extensions.getExtension(ext);
+const extEnabled = (ext: string): boolean => !!vscode.extensions.getExtension(ext);
+
+////////////////////////////////////////////////////////////////
+
+
+const DEFINE_PROFILE_NOW = "Define Profile Now";
+const DEACTIVATE_PROFILE = "Deactivate Profile";
+const ENABLE_EXTENSIONS = "Show Extensions to Enable";
+
+
+const DISABLE_EXTENSIONS = "Show Extensions to Disable";
+
 function activeProfilesSetupCommand() {
-	let extProfiles: ExtProfile[] = getExtProfiles();
+	let extProfiles: ProfileRef[] = getExtProfiles();
 
 	if (extProfiles.length == 0) {
 		vscode.window.showErrorMessage("No profiles defined!","Define profiles now")
@@ -105,15 +150,15 @@ function activeProfilesSetupCommand() {
 
 function getExtProfiles() {
 	const config = vscode.workspace.getConfiguration("extension-profiles");
-	let extProfiles: ExtProfile[] = [];
+	let extProfiles: ProfileRef[] = [];
 
-	Object.keys(config.get<any>("profiles")).forEach(key => extProfiles.push(new ExtProfile(key)));
+	Object.keys(config.get<any>("profiles")).forEach(key => extProfiles.push(new ProfileRef(key)));
 	config.get<Array<string>>("activeProfiles")?.forEach(key => {
 		let opt = extProfiles.find(opt => opt.name == key);
 		if (opt) {
 			opt.activated = true;
 		} else {
-			const newOpt = new ExtProfile(key);
+			const newOpt = new ProfileRef(key);
 			newOpt.exists = false;
 			newOpt.activated = true;
 			extProfiles.push(newOpt);
@@ -132,7 +177,7 @@ function getExtProfiles() {
 	return extProfiles;
 }
 
-function profileActionPicker(opt: ExtProfile) {
+function profileActionPicker(opt: ProfileRef) {
 	let viewAction = "View extensions in " + opt.name + " profile";
 	let activateAction = "Activate " + opt.name + " profile";
 	let deactivateAction = "Deactivate " + opt.name + " profile";
@@ -159,31 +204,32 @@ function profileActionPicker(opt: ExtProfile) {
 		})
 }
 
+
+const showErrorSavingActiveProfilesError: ((reason: any) => void | Thenable<void>) | undefined = err => {
+	vscode.window.showWarningMessage("Cannot save active extension profile: " + err);
+};
 function profileAction(profileName: string, activate: boolean, view: boolean, deactivate: boolean) {
 
-	const config = vscode.workspace.getConfiguration("extension-profiles");
+	const config = getConfig();
 	if (activate || deactivate) {
-		let activeProfiles = config.get<Array<string>>("activeProfiles") || [];
+		let activeProfiles = config.activeProfiles;
 		if (activate) {
 			activeProfiles.push(profileName);
 		} else if (deactivate) {
 			activeProfiles = activeProfiles.filter(p => p != profileName);
 		}
 	
-
-		config.update("activeProfiles", activeProfiles, vscode.ConfigurationTarget.Workspace)
-			.then(undefined, err => {
-				vscode.window.showWarningMessage("Cannot save active extension profile: " + err);        
-			})
+		vscode.workspace.getConfiguration("extension-profiles").update("activeProfiles", activeProfiles, vscode.ConfigurationTarget.Workspace)
+			.then(undefined, showErrorSavingActiveProfilesError)
 	}
 
 	if (view) {
-		const profileConfig = vscode.workspace.getConfiguration("extension-profiles.profiles").get<any>(profileName);
-		if (!deactivate) {
-			popupActiveProfileDisabledExts(profileConfig["disabledExtensions"] as Array<string>|undefined , profileName);
+		const profileConfig = config.profiles[profileName];
+		let extsNeedDisabled = !deactivate ? profileConfig.disabledExtensions : undefined;
+		if (extsNeedDisabled?.length) {
+			showExtsNeedDisabledPopup(extsNeedDisabled, profileName);
 		}
-		const extensions = profileConfig["extensions"] as Array<string>;
-		viewExtensionsSearch(extensions, profileName, "enable");
+		viewExtensionsSearch(profileConfig.extensions, profileName, "enable");
 	}
 }
 
