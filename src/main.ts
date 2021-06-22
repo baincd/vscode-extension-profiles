@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 const DEFINE_PROFILE_NOW = "Define Profile Now";
 const DEACTIVATE_PROFILE = "Deactivate Profile";
-const ENABLE_EXTENSIONS = "Enable extensions";
+const ENABLE_EXTENSIONS = "Show Extensions to Enable";
 function activeProfilesStartupCheck(config: vscode.WorkspaceConfiguration) {
 	config.get<Array<string>>("activeProfiles")?.forEach(activeProfile => {
 		const profileConfig = config.get<any>("profiles")[activeProfile];
@@ -60,7 +60,7 @@ function activeProfilesStartupCheck(config: vscode.WorkspaceConfiguration) {
 	});
 }
 
-const DISABLE_EXTENSIONS = "Disable Extensions";
+const DISABLE_EXTENSIONS = "Show Extensions to Disable";
 function popupActiveProfileDisabledExts(activeProfileDisabledExts: Array<string>|undefined, activeProfile: string) {
 	if (!activeProfileDisabledExts) {
 		return;
@@ -202,7 +202,7 @@ function viewExtensionsSearch(extensionIds: string[], profileName: string, extDi
 		}
 		vscode.commands.executeCommand("workbench.extensions.search", extSearchStr);
 		if (rolloverSearchStr) {
-			vscode.window.showWarningMessage("Profile '" + profileName + "': More extensions to " + extDisposition, extDisposition.toUpperCase() + " extensions")
+			vscode.window.showWarningMessage("Profile '" + profileName + "': More extensions to " + extDisposition, "View Extensions to " + extDisposition.charAt(0).toUpperCase() + extDisposition.slice(1))
 			.then(selected => {
 				if (selected) {
 					doDisplayExtensionSearch(rolloverSearchStr);
