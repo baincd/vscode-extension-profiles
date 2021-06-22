@@ -50,7 +50,7 @@ function activeProfilesStartupCheck(config: vscode.WorkspaceConfiguration) {
 			vscode.window.showWarningMessage("Profile '" + activeProfile + "': Not all extensions enabled", ENABLE_EXTENSIONS)
 				.then(selected => {
 					switch(selected) {
-						case ENABLE_EXTENSIONS: viewExtensionsSearch(nonEnabledExts); break;
+						case ENABLE_EXTENSIONS: viewExtensionsSearch(nonEnabledExts, activeProfile, "enable"); break;
 					}
 				})
 		}
@@ -70,7 +70,7 @@ function popupActiveProfileDisabledExts(activeProfileDisabledExts: Array<string>
 		vscode.window.showWarningMessage("Profile '" + activeProfile + "': extensions need to be DISABLED",DISABLE_EXTENSIONS)
 		.then(selected => {
 			if (selected == DISABLE_EXTENSIONS) {
-				viewExtensionsSearch(needToBeDisabledExts);
+				viewExtensionsSearch(needToBeDisabledExts, activeProfile, "disable");
 			}
 		})
 	}
@@ -183,7 +183,7 @@ function profileAction(profileName: string, activate: boolean, view: boolean, de
 			popupActiveProfileDisabledExts(profileConfig["disabledExtensions"] as Array<string>|undefined , profileName);
 		}
 		const extensions = profileConfig["extensions"] as Array<string>;
-		viewExtensionsSearch(extensions);
+		viewExtensionsSearch(extensions, profileName, "enable");
 	}
 }
 
@@ -191,13 +191,29 @@ function viewExtensionProfilesSettings() {
 	vscode.commands.executeCommand("workbench.action.openSettings", "extension-profiles.profiles");
 }
 
-function viewExtensionsSearch(extensionIds: string[]) {
-	const extSearchStr = extensionIds.join(" ");
-	vscode.commands.executeCommand("workbench.extensions.search", extSearchStr);
-	if (extSearchStr.length > 200) {
-		vscode.window.showErrorMessage("Not all extensions for profile may be displayed - search string is longer than extension sidebar search supports (200 chars)")
+function viewExtensionsSearch(extensionIds: string[], profileName: string, extDisposition: "enable"|"disable") {
+	doDisplayExtensionSearch(extensionIds.join(" "));
+
+	function doDisplayExtensionSearch(fullExtSearchStr: string) {
+		let extSearchStr = fullExtSearchStr;
+		let rolloverSearchStr = "";
+		if (fullExtSearchStr.length > 200) {
+			[, extSearchStr, rolloverSearchStr] = /^(.{0,200})(?: (.*))?$/.exec(fullExtSearchStr) || [];
+		}
+		vscode.commands.executeCommand("workbench.extensions.search", extSearchStr);
+		if (rolloverSearchStr) {
+			vscode.window.showWarningMessage("Profile '" + profileName + "': More extensions to " + extDisposition, extDisposition.toUpperCase() + " extensions")
+			.then(selected => {
+				if (selected) {
+					doDisplayExtensionSearch(rolloverSearchStr);
+				}
+			})
+		}
 	}
 }
+
+
+
 
 function activateProfileCommand(profileName: string) {
 	const config = vscode.workspace.getConfiguration("extension-profiles");
