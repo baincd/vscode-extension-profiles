@@ -65,9 +65,9 @@
 						"type": "string",
 						"description": "Extension profile name (must match a extension-profiles.profiles.* value)"
 					},
+					"default": [],
 					"description": "Active profiles (recommended to be set only on workspace settings)"
 				},
-				"default": [],
 				"extension-profiles.checkAllActiveProfileExtensionsAreEnabledOnStartup": {
 					"type": "boolean",
 					"default": true,
