@@ -1,0 +1,137 @@
+import * as vscode from 'vscode';
+
+import * as ui from './ui'
+import * as configUtils from './configUtils'
+
+import { Config, ProfileAction, ProfileRef } from "./types";
+
+export function activeProfilesStartupCheck(config: Config) {
+	config.activeProfiles?.forEach(activeProfileName => {
+		const activeProfileConfig = config.profiles[activeProfileName];
+		if (!activeProfileConfig) {
+			ui.showActiveProfileDoesNotExistPopup(activeProfileName);
+		} else {
+			profileAction(activeProfileName, ProfileAction.STARTUP);
+		}
+	});
+}
+
+export function activeProfilesSetupCommand() {
+	let profileRefs: ProfileRef[] = configUtils.getProfileRefs();
+
+	if (profileRefs.length == 0) {
+		ui.showNoProfilesDefinedPopup();
+		return;
+	}
+
+	vscode.window.showQuickPick(profileRefs.map(opt => opt.displayName()))
+		.then(selectedDisplayName => {
+			profileSelectedAction(profileRefs.find(opt => opt.displayName() == selectedDisplayName))
+		}
+	)
+}
+
+
+function profileSelectedAction(opt?: ProfileRef) {
+	if (!opt) {
+		return;
+	}
+	let viewAction = "View extensions in " + opt.name + " profile";
+	let activateAction = "Activate " + opt.name + " profile";
+	let deactivateAction = "Deactivate " + opt.name + " profile";
+
+	let actionOptions: string[] = [];
+
+	if (opt.exists && !opt.activated) {
+		actionOptions.push(activateAction);
+	}
+	if (opt.exists) {
+		actionOptions.push(viewAction);
+	}
+	if (opt.activated) {
+		actionOptions.push(deactivateAction);
+	}
+
+	vscode.window.showQuickPick(actionOptions)
+		.then(selectedAction => {
+			switch(selectedAction) {
+				case viewAction: profileAction(opt.name, ProfileAction.VIEW); break;
+				case activateAction: profileAction(opt.name, ProfileAction.ACTIVATE); break;
+				case deactivateAction: profileAction(opt.name, ProfileAction.DEACTIVATE); break;
+			}
+		})
+}
+
+export function activateProfileCommand(profileName: string) {
+	const config = configUtils.getConfig();
+
+	if (config.activeProfiles?.find(p => p == profileName)) {
+		vscode.window.showInformationMessage("Profile '" + profileName + "' is already active");
+		return;
+	}
+
+	if (!config.profiles[profileName]) {
+		vscode.window.showErrorMessage("Profile '" + profileName + "' is not defined");
+		return;
+	}
+
+	profileAction(profileName, ProfileAction.ACTIVATE);
+}
+
+
+//                  exts                     disabledExts            Notes
+// ACTIVATE         sidebar(need to enable)  popup(need to disable)  If nothing displayed, info popup
+// STARTUP          popup(need to enable)    popup(need to disable)
+// VIEW             sidebar(all)             popup(all)
+// DEACTIVATE       (none)                   (none)                  Info Popup
+const extNotEnabled = (ext: string): boolean => !vscode.extensions.getExtension(ext);
+const extEnabled = (ext: string): boolean => !!vscode.extensions.getExtension(ext);
+export function profileAction(profileName: string, action: ProfileAction, config: Config = configUtils.getConfig()) {
+	if (action == ProfileAction.ACTIVATE || action == ProfileAction.DEACTIVATE) {
+		let activeProfiles = config.activeProfiles;
+		if (action == ProfileAction.ACTIVATE) {
+			activeProfiles.push(profileName);
+		} else if (action == ProfileAction.DEACTIVATE) {
+			activeProfiles = activeProfiles.filter(p => p != profileName);
+		}
+	
+		vscode.workspace.getConfiguration("extension-profiles").update("activeProfiles", activeProfiles, vscode.ConfigurationTarget.Workspace)
+			.then(undefined, ui.showErrorSavingActiveProfilesError)
+	}
+
+	let extsNeedEnabled: Array<string>;
+	let extsNeedDisabled: Array<string>;
+	const profileConfig = config.profiles[profileName];
+
+	if (action == ProfileAction.ACTIVATE || action == ProfileAction.STARTUP) {
+		extsNeedEnabled = profileConfig.extensions.filter(extNotEnabled);
+		extsNeedDisabled = profileConfig.disabledExtensions?.filter(extEnabled) || [];
+	} else if (action == ProfileAction.VIEW) {
+		extsNeedEnabled = profileConfig.extensions;
+		extsNeedDisabled = profileConfig.disabledExtensions || [];
+	} else {
+		extsNeedEnabled = [];
+		extsNeedDisabled = [];
+	}
+
+	if (extsNeedEnabled.length) {
+		if (action == ProfileAction.STARTUP) {
+			ui.showExtsNeedEnabledPopup(extsNeedEnabled, profileName);
+		} else {
+			ui.viewExtensionsSearch(profileConfig.extensions, profileName, "enable");
+		}
+	}
+	if (extsNeedDisabled.length) {
+		ui.showExtsNeedDisabledPopup(extsNeedDisabled, profileName);
+	}
+	if (!extsNeedEnabled.length && !extsNeedDisabled.length) {
+		if (action == ProfileAction.ACTIVATE) {
+			ui.showProfileActionCompletedPopup(profileName, "Profile '" + profileName + "' activated - no extensions need to be enabled or disabled");
+		} else if (action == ProfileAction.DEACTIVATE) {
+			ui.showProfileActionCompletedPopup(profileName, "Profile '" + profileName + "' deactivated");
+		}
+	}
+
+}
+
+
