@@ -1,5 +1,12 @@
 import * as vscode from 'vscode';
 
+///// Global Constants
+const DEFINE_PROFILE_NOW = "Define Profile Now";
+const DEACTIVATE_PROFILE = "Deactivate Profile";
+const ENABLE_EXTENSIONS = "Show Extensions to Enable";
+const DISABLE_EXTENSIONS = "Show Extensions to Disable";
+
+
 ///// Types
 interface ProfileConfig {
 	extensions: Array<string>
@@ -14,6 +21,13 @@ interface Config {
 	profiles: ProfilesConfig
 	activeProfiles: Array<string>
 	checkAllActiveProfileExtensionsAreEnabledOnStartup: boolean
+}
+
+enum ProfileAction {
+	ACTIVATE,
+	DEACTIVATE,
+	STARTUP,
+	VIEW
 }
 
 class ProfileRef {
@@ -103,6 +117,22 @@ function profileSelectedAction(opt?: ProfileRef) {
 		})
 }
 
+function activateProfileCommand(profileName: string) {
+	const config = getConfig();
+
+	if (config.activeProfiles?.find(p => p == profileName)) {
+		vscode.window.showInformationMessage("Profile '" + profileName + "' is already active");
+		return;
+	}
+
+	if (!config.profiles[profileName]) {
+		vscode.window.showErrorMessage("Profile '" + profileName + "' is not defined");
+		return;
+	}
+
+	profileAction(profileName, ProfileAction.ACTIVATE);
+}
+
 ///// Configuration getters
 function getConfig(): Config {
 	return vscode.workspace.getConfiguration().get<Config>("extension-profiles")
@@ -165,7 +195,14 @@ function showExtsNeedDisabledPopup(needToBeDisabledExts: string[], profileName: 
 			}
 		});
 }
-
+function showProfileActionCompletedPopup(profileName: string, msg: string) {
+	vscode.window.showInformationMessage(msg, "View extensions in profile")
+	.then(selected => {
+		if (selected) {
+			profileAction(profileName, ProfileAction.VIEW);
+		}
+	})
+}
 function showActiveProfileDoesNotExistPopup(activeProfile: string) {
 	vscode.window.showErrorMessage("Profile '" + activeProfile + "' Not Defined", DEFINE_PROFILE_NOW, DEACTIVATE_PROFILE)
 		.then(selected => {
@@ -193,35 +230,13 @@ function showErrorSavingActiveProfilesError(err: string) {
 const extNotEnabled = (ext: string): boolean => !vscode.extensions.getExtension(ext);
 const extEnabled = (ext: string): boolean => !!vscode.extensions.getExtension(ext);
 
-////////////////////////////////////////////////////////////////
-
-
-const DEFINE_PROFILE_NOW = "Define Profile Now";
-const DEACTIVATE_PROFILE = "Deactivate Profile";
-const ENABLE_EXTENSIONS = "Show Extensions to Enable";
-const DISABLE_EXTENSIONS = "Show Extensions to Disable";
-
+///// The Engine Room
 
 //                  exts                     disabledExts            Notes
 // ACTIVATE         sidebar(need to enable)  popup(need to disable)  If nothing displayed, info popup
 // STARTUP          popup(need to enable)    popup(need to disable)
 // VIEW             sidebar(all)             popup(all)
 // DEACTIVATE       (none)                   (none)                  Info Popup
-function showProfileActionCompletedPopup(profileName: string, msg: string) {
-	vscode.window.showInformationMessage(msg, "View extensions in profile")
-	.then(selected => {
-		if (selected) {
-			profileAction(profileName, ProfileAction.VIEW);
-		}
-	})
-}
-
-enum ProfileAction {
-	ACTIVATE,
-	DEACTIVATE,
-	STARTUP,
-	VIEW
-}
 function profileAction(profileName: string, action: ProfileAction, config: Config = getConfig()) {
 	if (action == ProfileAction.ACTIVATE || action == ProfileAction.DEACTIVATE) {
 		let activeProfiles = config.activeProfiles;
@@ -270,7 +285,6 @@ function profileAction(profileName: string, action: ProfileAction, config: Confi
 
 }
 
-
 function viewExtensionsSearch(extensionIds: string[], profileName: string, extDisposition: "enable"|"disable") {
 	doDisplayExtensionSearch(extensionIds.join(" "));
 
@@ -292,19 +306,3 @@ function viewExtensionsSearch(extensionIds: string[], profileName: string, extDi
 	}
 }
 
-
-function activateProfileCommand(profileName: string) {
-	const config = getConfig();
-
-	if (config.activeProfiles?.find(p => p == profileName)) {
-		vscode.window.showInformationMessage("Profile '" + profileName + "' is already active");
-		return;
-	}
-
-	if (!config.profiles[profileName]) {
-		vscode.window.showErrorMessage("Profile '" + profileName + "' is not defined");
-		return;
-	}
-
-	profileAction(profileName, ProfileAction.ACTIVATE);
-}
