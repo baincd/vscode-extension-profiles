@@ -61,7 +61,7 @@ export function showNoProfilesDefinedPopup() {
 		});
 }
 export function showErrorSavingActiveProfilesPopup(err: string) {
-	vscode.window.showWarningMessage("Cannot save active extension profile: " + err);
+	vscode.window.showErrorMessage("Cannot save active extension profile: " + err);
 }
 
 
