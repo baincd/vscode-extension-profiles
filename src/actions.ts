@@ -118,7 +118,7 @@ export function profileAction(profileName: string, action: ProfileAction, config
 		if (action == ProfileAction.STARTUP) {
 			ui.showExtsNeedEnabledPopup(extsNeedEnabled, profileName);
 		} else {
-			ui.showExtensionsSearch(profileConfig.extensions, profileName, "enable");
+			ui.showExtensionsSearch(extsNeedEnabled, profileName, "enable");
 		}
 	}
 	if (extsNeedDisabled.length) {
