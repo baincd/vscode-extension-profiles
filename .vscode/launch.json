@@ -9,7 +9,7 @@
             "args": [
                 "--extensionDevelopmentPath=${workspaceRoot}",
 				"--user-data-dir=${workspaceRoot}/test/usr",
-				"--extensions-dir=${workspaceRoot}/test/ext",
+				//"--extensions-dir=${workspaceRoot}/test/ext", // doesn't seem to work  :-/
 				"${workspaceRoot}/test/ws",
             ],
             "stopOnEntry": false,
@@ -17,18 +17,5 @@
             "outFiles": [ "${workspaceRoot}/out/**/*.js" ],
             "preLaunchTask": "npm: watch"
         },
-		{
-			"name": "Run Extension Tests",
-			"type": "extensionHost",
-			"request": "launch",
-			"runtimeExecutable": "${execPath}",
-			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
-			],
-			"outFiles": ["${workspaceFolder}/out/test/**/*.js"],
-			"preLaunchTask": "npm: watch",
-            "internalConsoleOptions": "openOnSessionStart"
-		}
 	]
 }
