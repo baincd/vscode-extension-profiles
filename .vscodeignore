@@ -4,7 +4,8 @@
 .gitignore
 tslint.json
 tsconfig.json
-out/test/**
+webpack.config.js
+out/
 *?.gitignored.?*
 *?.gitignored
 example-files/**
