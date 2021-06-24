@@ -31,13 +31,17 @@ export function showExtsNeedDisabledPopup(needToBeDisabledExts: string[], profil
 			}
 		});
 }
-export function showProfileActionCompletedPopup(profileName: string, msg: string) {
-	vscode.window.showInformationMessage(msg, "Show Profile Extensions")
-	.then(selected => {
-		if (selected) {
-			actions.profileAction(profileName, ProfileAction.VIEW);
-		}
-	})
+export function showProfileActionCompletedPopup(profileName: string, msg: string, viewBtn: boolean = true) {
+	if (!viewBtn) {
+		vscode.window.showInformationMessage(msg);
+	} else {
+		vscode.window.showInformationMessage(msg, "Show Profile Extensions")
+		.then(selected => {
+			if (selected) {
+				actions.profileAction(profileName, ProfileAction.VIEW);
+			}
+		})
+	}
 }
 export function showActiveProfileDoesNotExistPopup(activeProfile: string) {
 	vscode.window.showErrorMessage("Profile '" + activeProfile + "' Not Defined", DEFINE_PROFILE_NOW, DEACTIVATE_PROFILE)

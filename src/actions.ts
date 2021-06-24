@@ -128,7 +128,7 @@ export function profileAction(profileName: string, action: ProfileAction, config
 		if (action == ProfileAction.ACTIVATE) {
 			ui.showProfileActionCompletedPopup(profileName, "Profile '" + profileName + "' activated - no extensions need to be enabled or disabled");
 		} else if (action == ProfileAction.DEACTIVATE) {
-			ui.showProfileActionCompletedPopup(profileName, "Profile '" + profileName + "' deactivated");
+			ui.showProfileActionCompletedPopup(profileName, "Profile '" + profileName + "' deactivated", profileConfig != undefined);
 		}
 	}
 
