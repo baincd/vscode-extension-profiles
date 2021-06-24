@@ -5,7 +5,7 @@ import * as configUtils from './configUtils'
 
 import { Config, ProfileAction, ProfileRef } from "./types";
 
-export function activeProfilesStartupCheck(config: Config) {
+export function startupCheck(config: Config) {
 	config.activeProfiles?.forEach(activeProfileName => {
 		const activeProfileConfig = config.profiles[activeProfileName];
 		if (!activeProfileConfig) {
@@ -79,11 +79,11 @@ export function activateProfileCommand(profileName: string) {
 }
 
 
-//                  exts                     disabledExts            Notes
-// ACTIVATE         sidebar(need to enable)  popup(need to disable)  If nothing displayed, info popup
-// STARTUP          popup(need to enable)    popup(need to disable)
-// VIEW             sidebar(all)             popup(all)
-// DEACTIVATE       (none)                   (none)                  Info Popup
+//                  exts                        disabledExts                  Notes
+// ACTIVATE         sidebar(exts.needToEnable)  popup(disExts.needToDisable)  If nothing displayed, info popup
+// STARTUP          popup(exts.needToEnable)    popup(disExts.needToDisable)
+// VIEW             sidebar(exts)               popup(disExts)
+// DEACTIVATE       (none)                      (none)                        Info Popup
 const extNotEnabled = (ext: string): boolean => !vscode.extensions.getExtension(ext);
 const extEnabled = (ext: string): boolean => !!vscode.extensions.getExtension(ext);
 export function profileAction(profileName: string, action: ProfileAction, config: Config = configUtils.getConfig()) {
@@ -96,7 +96,7 @@ export function profileAction(profileName: string, action: ProfileAction, config
 		}
 	
 		vscode.workspace.getConfiguration("extension-profiles").update("activeProfiles", activeProfiles, vscode.ConfigurationTarget.Workspace)
-			.then(undefined, ui.showErrorSavingActiveProfilesError)
+			.then(undefined, ui.showErrorSavingActiveProfilesPopup)
 	}
 
 	let extsNeedEnabled: Array<string>;
@@ -118,7 +118,7 @@ export function profileAction(profileName: string, action: ProfileAction, config
 		if (action == ProfileAction.STARTUP) {
 			ui.showExtsNeedEnabledPopup(extsNeedEnabled, profileName);
 		} else {
-			ui.viewExtensionsSearch(profileConfig.extensions, profileName, "enable");
+			ui.showExtensionsSearch(profileConfig.extensions, profileName, "enable");
 		}
 	}
 	if (extsNeedDisabled.length) {

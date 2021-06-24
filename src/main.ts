@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { activeProfilesSetupCommand, activateProfileCommand, activeProfilesStartupCheck } from "./actions";
+import { activeProfilesSetupCommand, activateProfileCommand, startupCheck } from "./actions";
 import { getConfig } from './configUtils';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -14,6 +14,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const config = getConfig();
 	if (config.checkAllActiveProfileExtensionsAreEnabledOnStartup) {
-		activeProfilesStartupCheck(config);
+		startupCheck(config);
 	}
 }

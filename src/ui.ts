@@ -19,7 +19,7 @@ export function showExtsNeedEnabledPopup(extsNeedEnabled: string[], profileName:
 	vscode.window.showWarningMessage("Profile '" + profileName + "': extensions need to be enabled", ENABLE_EXTENSIONS)
 		.then(selected => {
 			switch (selected) {
-				case ENABLE_EXTENSIONS: viewExtensionsSearch(extsNeedEnabled, profileName, "enable"); break;
+				case ENABLE_EXTENSIONS: showExtensionsSearch(extsNeedEnabled, profileName, "enable"); break;
 			}
 		});
 }
@@ -27,12 +27,12 @@ export function showExtsNeedDisabledPopup(needToBeDisabledExts: string[], profil
 	vscode.window.showWarningMessage("Profile '" + profileName + "': extensions need to be DISABLED", DISABLE_EXTENSIONS)
 		.then(selected => {
 			if (selected == DISABLE_EXTENSIONS) {
-				viewExtensionsSearch(needToBeDisabledExts, profileName, "disable");
+				showExtensionsSearch(needToBeDisabledExts, profileName, "disable");
 			}
 		});
 }
 export function showProfileActionCompletedPopup(profileName: string, msg: string) {
-	vscode.window.showInformationMessage(msg, "View extensions in profile")
+	vscode.window.showInformationMessage(msg, "Show Profile Extensions")
 	.then(selected => {
 		if (selected) {
 			actions.profileAction(profileName, ProfileAction.VIEW);
@@ -56,15 +56,15 @@ export function showNoProfilesDefinedPopup() {
 			}
 		});
 }
-export function showErrorSavingActiveProfilesError(err: string) {
+export function showErrorSavingActiveProfilesPopup(err: string) {
 	vscode.window.showWarningMessage("Cannot save active extension profile: " + err);
 }
 
 
-export function viewExtensionsSearch(extensionIds: string[], profileName: string, extDisposition: "enable"|"disable") {
-	doDisplayExtensionSearch(extensionIds.join(" "));
+export function showExtensionsSearch(extensionIds: string[], profileName: string, extDisposition: "enable"|"disable") {
+	doExtensionSearch(extensionIds.join(" "));
 
-	function doDisplayExtensionSearch(fullExtSearchStr: string) {
+	function doExtensionSearch(fullExtSearchStr: string) {
 		let extSearchStr = fullExtSearchStr;
 		let rolloverSearchStr = "";
 		if (fullExtSearchStr.length > 200) {
@@ -75,7 +75,7 @@ export function viewExtensionsSearch(extensionIds: string[], profileName: string
 			vscode.window.showWarningMessage("Profile '" + profileName + "': More extensions to " + extDisposition, "View Extensions to " + extDisposition.charAt(0).toUpperCase() + extDisposition.slice(1))
 			.then(selected => {
 				if (selected) {
-					doDisplayExtensionSearch(rolloverSearchStr);
+					doExtensionSearch(rolloverSearchStr);
 				}
 			})
 		}
