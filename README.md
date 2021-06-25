@@ -87,5 +87,6 @@ To configure a keyboard shortcut to active a profile, add to `keybindings.json`:
 
 ## Known Limitations
 
-- Extension cannot automatically enabled/disable extensions (vscode API limitation).  As a workaround, the extension sidebar search is used to display the list of extensions so you can quickly enable/disable extensions in a workspace
-- The extension sidebar search has a limitation of 200 characters (additional characters after the 200th are not considered for the search).  A warning message will be displayed if this occurs
+- The extension sidebar search has a limitation of 200 characters.  When activating or viewing a profile, the extension search will broken into searches of less than 200 characters.  A popup message will notify if there are additional extensions to display and include a button to execute the next search.
+
+![More Extensions to Enable Popup Example](images/example-more-extensions-to-enable.png)
