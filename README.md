@@ -47,15 +47,15 @@ Extension Profiles provides a workaround (within the limitations of the vscode A
 
 ## Additional Features
 
-### Command
+### Command Pallete
 
 From the "Extension Profiles: Active Profiles Setup" command, you can:
 
   - Activate a profile (as described above)
-  - View the extensions for a profile in the extensions sidebar (without activating/deactivating the profile for the workspace)
-  - Deactivate a profile (extensions will be displayed in extension sidebar so you can manually disable them)
+  - View all the extensions for a profile in the extensions sidebar (without activating/deactivating the profile for the workspace)
+  - Deactivate a profile
 
-### Configure Disabled Extensions on Profiles
+### Disabled Extensions on Profiles
 
 Profiles can also be configured with extensions that should be disabled.  If there are extensions that should be disabled in the workspace, a popup will notify you along with a button so you can easily disable the extensions on the extension sidebar.
 
@@ -72,6 +72,8 @@ To configure disabled extensions:
       },
     },
 ```
+
+![Disabled extensions popup example](images/example-disabled-ext-popup.png)
 
 ### Create keyboard shortcut to directly activate a profile
 
