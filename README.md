@@ -4,9 +4,36 @@ Define sets of extensions that can quickly be enabled in workspaces via settings
 
 ## Summary
 
-Do you have extensions you only want enabled for certain workspaces - for example, a set of extensions enabled only for Java projects, and another set enabled only for Python projects, etc?  While VS Code does allow for enabling/disabling extensions in a workspace, it is done manually via the extension sidebar - a process which is slow, error prone, and static.  There is even a popular VS Code feature request to [enable/disable extensions via a configuration file](https://github.com/microsoft/vscode/issues/40239), but it does not appear likely to be implemented anytime soon.
+Do you have extensions you *only* want enabled for certain workspaces?  For example, a set of extensions enabled only for Java projects, and another set enabled only for Python projects, etc?
 
-Extension Profiles provides a workaround (within the limitations of the vscode API) to this missing feature!  You define sets of extensions as profiles, and activate different profiles in different workspaces so you can quickly enable the set(s) of extensions you need to different types of projects!
+VS Code does allow enabling/disabling extensions in a workspace manually. But you must remember which extensions you want enabled for each type of workspace (for example, Java), and then scroll through the list of *all* installed extensions to find the ones you want to enable (while hoping you don't miss any).  And if you add a new Java extension, you have to remember to enable it in all your existing Java workspaces.  Do you wish there was a way to define groups of extensions that can be enabled in a workspace together quickly and consistently?  And to be able to modify these groups of extensions, and have existing workspaces updated?
+
+If so, then Extension Profiles may be the solution you are looking for!  Extension Profiles allows you to disable extensions globally, and then enable them quickly in the workspaces you want. How it works is:
+
+- First, you globally disable the extensions you do not want enabled in all workspaces
+- Next, you define extension profiles (groups of extensions you want to enable together) in your user settings
+- Then, you open a workspace and activate an extension profile.  Any extensions defined in the activated profile which are not currently enabled will be automatically displayed on the extension sidebar, where you can quickly enable them all for the workspace
+- And each time the workspace is opened, if any extensions for the workspace's active profiles are not enabled (for example, if a new extension was added to the profile), a warning message will be displayed with a prompt to enable those extensions
+
+Additional features include:
+
+- Workspaces can have multiple active profiles
+- View the extensions in a profile without saving the profile as active
+- Deactivate a profile in a workspace
+- Define extensions that should be disabled as part of a profile
+- Ability to create a keyboard shortcut to activate a specific profile
+
+
+## Extension Profiles Goal
+
+The goal of Extension Profiles is to provide a solution to easily enable/disable groups of extensions using only the VS Code API.
+
+There is a popular VS Code feature request to [enable/disable extensions via a configuration file](https://github.com/microsoft/vscode/issues/40239), however it does not appear likely to be implemented anytime soon.
+
+There are other extensions and workarounds to provide similar functionality in a more automated way, however they involve manipulating the VS Code extensions directory and/or the VS Code internal User data.
+
+By using only the VS Code API, Extension Profiles is limited in the functionality it can provide (for example, extensions cannot be enabled/disabled via the API).  But the benefit is the promise of stability in both your VS Code installation and the Extension Profiles extension.
+
 
 ## Usage
 
