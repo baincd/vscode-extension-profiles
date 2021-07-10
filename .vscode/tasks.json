@@ -19,7 +19,7 @@
 		{
 			"label": "Run Extension in Test VS Code Instance",
 			"type": "shell",
-			"command": "vsce package && code --user-data-dir ./test/usr --extensions-dir ./test/ext ./test/ws --install-extension $(/bin/ls -1 -t *.vsix | head -n 1) && code --user-data-dir ./test/usr --extensions-dir ./test/ext ./test/ws",
+			"command": "vsce package && mkdir -p ~/tmp/test-extension-profiles/ws && code --user-data-dir ~/tmp/test-extension-profiles/usr --extensions-dir ~/tmp/test-extension-profiles/ext ~/tmp/test-extension-profiles/ws --install-extension $(/bin/ls -1 -t *.vsix | head -n 1) && code --user-data-dir ~/tmp/test-extension-profiles/usr --extensions-dir ~/tmp/test-extension-profiles/ext ~/tmp/test-extension-profiles/ws",
 			"runOptions": {
 				"instanceLimit": 1
 			},
