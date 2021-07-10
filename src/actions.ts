@@ -107,19 +107,9 @@ export function profileAction(profileName: string, action: ProfileAction, config
 		return;
 	}
 
-	let extsNeedEnabled: Array<string>;
-	let extsNeedDisabled: Array<string>;
-
-	if (action == ProfileAction.ACTIVATE || action == ProfileAction.STARTUP) {
-		extsNeedEnabled = profileConfig.extensions.filter(extNotEnabled);
-		extsNeedDisabled = profileConfig.disabledExtensions?.filter(extEnabled) || [];
-	} else if (action == ProfileAction.VIEW) {
-		extsNeedEnabled = profileConfig.extensions;
-		extsNeedDisabled = profileConfig.disabledExtensions || [];
-	} else {
-		extsNeedEnabled = [];
-		extsNeedDisabled = [];
-	}
+	const isViewAction = action == ProfileAction.VIEW;
+	let extsNeedEnabled: Array<string> = (isViewAction ? profileConfig.extensions : profileConfig.extensions.filter(extNotEnabled));
+	let extsNeedDisabled: Array<string> = (isViewAction ? profileConfig.disabledExtensions : profileConfig.disabledExtensions?.filter(extEnabled)) || [];
 
 	if (extsNeedEnabled.length) {
 		if (action == ProfileAction.STARTUP) {
