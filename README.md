@@ -12,7 +12,7 @@ If so, then Extension Profiles may be the solution you are looking for!  Extensi
 
 - First, you globally disable the extensions you do not want enabled in all workspaces
 - Next, you define extension profiles (groups of extensions you want to enable together) in your user settings
-- Then, you open a workspace and activate an extension profile.  Any extensions defined in the activated profile which are not currently enabled will be automatically displayed on the extension sidebar, where you can quickly enable them all for the workspace
+- Then, you open a workspace and activate an extension profile.  Any extensions defined in the activated profile which are not enabled in the workspace will be automatically displayed on the extension sidebar, so you can quickly enable them all for that workspace
 - And each time the workspace is opened, if any extensions for the workspace's active profiles are not enabled (for example, if a new extension was added to the profile), a warning message will be displayed with a prompt to enable those extensions
 
 Additional features include:
@@ -30,10 +30,9 @@ The goal of Extension Profiles is to provide a solution to easily enable/disable
 
 There is a popular VS Code feature request to [enable/disable extensions via a configuration file](https://github.com/microsoft/vscode/issues/40239), however it does not appear likely to be implemented anytime soon.
 
-There are other extensions and workarounds to provide similar functionality in a more automated way, however they involve manipulating the VS Code extensions directory and/or the VS Code internal User data.
+There are other extensions and workarounds to provide similar functionality in a more automated way, however they work by manipulating the VS Code extensions folder or directly modifying the VS Code internal User data.
 
-By using only the VS Code API, Extension Profiles is limited in the functionality it can provide (for example, extensions cannot be enabled/disabled via the API).  But the benefit is the promise of stability in both your VS Code installation and the Extension Profiles extension.
-
+By using only the VS Code API, Extension Profiles provides a solution to easily manage enabling/disabling self-defined groups of extensions without impacting the stability in your VS Code installation.
 
 ## Usage
 
