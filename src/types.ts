@@ -1,6 +1,7 @@
 export interface ProfileConfig {
 	extensions: Array<string>
-	disabledExtensions?: Array<string>
+	disabledExtensions?: Array<string>,
+	temporaryProfile?: boolean
 }
 
 export interface ProfilesConfig {

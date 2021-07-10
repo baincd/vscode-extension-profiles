@@ -10,6 +10,8 @@ export function startupCheck(config: Config) {
 		const activeProfileConfig = config.profiles[activeProfileName];
 		if (!activeProfileConfig) {
 			ui.showActiveProfileDoesNotExistPopup(activeProfileName);
+		} else if (activeProfileConfig.temporaryProfile) {
+			ui.showTemporaryProfileIsActivePopup(activeProfileName);
 		} else {
 			profileAction(activeProfileName, ProfileAction.STARTUP);
 		}

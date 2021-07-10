@@ -49,6 +49,11 @@
 									"description": "Extension ID"
 								},
 								"description": "Array of extension IDs that should be disabled with this profile is active"
+							},
+							"temporaryProfile": {
+								"type": "boolean",
+								"default": false,
+								"description": "Temporary profiles are for extensions you want to only enable temporarily.  When a workspace is opened, a warning popup will be displayed for any temporary profiles that are active"
 							}
 						},
 						"required": [

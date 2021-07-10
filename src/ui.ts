@@ -4,10 +4,10 @@ import * as actions from './actions'
 import { ProfileAction } from "./types";
 
 const DEFINE_PROFILE_NOW = "Define Profile Now";
+const VIEW_PROFILE = "Show Profile Extensions";
 const DEACTIVATE_PROFILE = "Deactivate Profile";
 const ENABLE_EXTENSIONS = "Show Extensions to Enable";
 const DISABLE_EXTENSIONS = "Show Extensions to Disable";
-
 
 
 function showSettings() {
@@ -35,7 +35,7 @@ export function showProfileActionCompletedPopup(profileName: string, msg: string
 	if (!viewBtn) {
 		vscode.window.showInformationMessage(msg);
 	} else {
-		vscode.window.showInformationMessage(msg, "Show Profile Extensions")
+		vscode.window.showInformationMessage(msg, VIEW_PROFILE)
 		.then(selected => {
 			if (selected) {
 				actions.profileAction(profileName, ProfileAction.VIEW);
@@ -84,4 +84,16 @@ export function showExtensionsSearch(extensionIds: string[], profileName: string
 			})
 		}
 	}
+}
+
+export function showTemporaryProfileIsActivePopup(profileName: string) {
+	vscode.window.showWarningMessage("Temporary Profile '" + profileName + "' is active", DEACTIVATE_PROFILE, VIEW_PROFILE).then(
+		selectedBtn => {
+			switch (selectedBtn) {
+				case DEACTIVATE_PROFILE: actions.profileAction(profileName, ProfileAction.DEACTIVATE); break;
+				case VIEW_PROFILE: actions.profileAction(profileName, ProfileAction.VIEW); break;
+				default: actions.profileAction(profileName, ProfileAction.STARTUP); break;
+			}
+		}
+	)
 }
