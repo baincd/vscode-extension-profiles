@@ -11,7 +11,7 @@ export interface ProfilesConfig {
 export interface Config {
 	profiles: ProfilesConfig
 	activeProfiles: Array<string>
-	checkAllActiveProfileExtensionsAreEnabledOnStartup: boolean
+	enableStartupCheck: boolean
 }
 
 export enum ProfileAction {

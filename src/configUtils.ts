@@ -6,7 +6,7 @@ export function getConfig(): Config {
 	return vscode.workspace.getConfiguration().get<Config>("extension-profiles")
 		|| {
 			activeProfiles: [],
-			checkAllActiveProfileExtensionsAreEnabledOnStartup: false,
+			enableStartupCheck: false,
 			profiles: {}
 		};
 }

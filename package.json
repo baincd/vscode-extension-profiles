@@ -73,10 +73,10 @@
 					"default": [],
 					"description": "Active profiles (recommended to be set only on workspace settings)"
 				},
-				"extension-profiles.checkAllActiveProfileExtensionsAreEnabledOnStartup": {
+				"extension-profiles.enableStartupCheck": {
 					"type": "boolean",
 					"default": true,
-					"description": "On startup, check if there are any extensions that are part of active profiles but are not enabled.  If there are, display warning popup with button to display extensions in sidebar"
+					"markdownDescription": "If enabled, warn on startup about the following conditions:\n- Active profiles with extensions that need to be enabled or disabled\n- Active profiles that are not defined\n- Temporary profiles that are active"
 				}
 			}
 		}

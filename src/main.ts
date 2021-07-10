@@ -1,3 +1,4 @@
+import { deprecate } from 'util';
 import * as vscode from 'vscode';
 
 import { activeProfilesSetupCommand, activateProfileCommand, startupCheck } from "./actions";
@@ -15,7 +16,16 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	const config = getConfig();
-	if (config.checkAllActiveProfileExtensionsAreEnabledOnStartup) {
+	if (config.enableStartupCheck) {
 		setTimeout(() => {startupCheck(config)}, MS_STARTUP_CHECK_DELAY);
+	}
+
+	deprecatedSettingsCheck();
+}
+
+
+function deprecatedSettingsCheck() {
+	if (vscode.workspace.getConfiguration().has("extension-profiles.checkAllActiveProfileExtensionsAreEnabledOnStartup")) { // Added 1.3.0 July 2021
+		vscode.window.showWarningMessage("Setting extension-profiles.checkAllActiveProfileExtensionsAreEnabledOnStartup has been renamed as extension-profiles.enableStartupCheck.  Please update your settings.");
 	}
 }
