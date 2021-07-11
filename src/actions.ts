@@ -80,14 +80,15 @@ export function activateProfileCommand(profileName: string) {
 	profileAction(profileName, ProfileAction.ACTIVATE);
 }
 
+const extNotEnabled = (ext: string): boolean => !vscode.extensions.getExtension(ext);
+const extEnabled = (ext: string): boolean => !!vscode.extensions.getExtension(ext);
+
 
 //                  exts                        disabledExts                  Notes
 // ACTIVATE         sidebar(exts.needToEnable)  popup(disExts.needToDisable)  If nothing displayed, info popup
 // STARTUP          popup(exts.needToEnable)    popup(disExts.needToDisable)
 // VIEW             sidebar(exts)               popup(disExts)
 // DEACTIVATE       (none)                      (none)                        Info Popup
-const extNotEnabled = (ext: string): boolean => !vscode.extensions.getExtension(ext);
-const extEnabled = (ext: string): boolean => !!vscode.extensions.getExtension(ext);
 export function profileAction(profileName: string, action: ProfileAction, config: Config = configUtils.getConfig()) {
 	if (action == ProfileAction.ACTIVATE || action == ProfileAction.DEACTIVATE) {
 		let activeProfiles = config.activeProfiles;
