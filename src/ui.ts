@@ -8,6 +8,7 @@ const VIEW_PROFILE = "Show Profile Extensions";
 const DEACTIVATE_PROFILE = "Deactivate Profile";
 const ENABLE_EXTENSIONS = "Show Extensions to Enable";
 const DISABLE_EXTENSIONS = "Show Extensions to Disable";
+const SET_SETTINGS = "Show Settings to Configure";
 
 
 function showSettings() {
@@ -31,6 +32,15 @@ export function showExtsNeedDisabledPopup(needToBeDisabledExts: string[], profil
 			}
 		});
 }
+export function showSettingsNeedSetPopup(settingsNeedSet: { [key: string]: any; }, profileName: string) {
+	vscode.window.showWarningMessage("Profile '" + profileName + "': settings need to be configured on the workspace", SET_SETTINGS)
+		.then(selected => {
+			if (selected == SET_SETTINGS) {
+				showSettingsNeedToBeSet(settingsNeedSet, profileName);
+			}
+		});
+}
+
 export function showProfileActionCompletedPopup(profileName: string, msg: string, viewBtn: boolean = true) {
 	if (!viewBtn) {
 		vscode.window.showInformationMessage(msg);
@@ -64,7 +74,6 @@ export function showErrorSavingActiveProfilesPopup(err: string) {
 	vscode.window.showErrorMessage("Cannot save active extension profile: " + err);
 }
 
-
 export function showExtensionsSearch(extensionIds: string[], profileName: string, extDisposition: "enable"|"disable") {
 	doExtensionSearch(extensionIds.join(" "));
 
@@ -96,4 +105,12 @@ export function showTemporaryProfileIsActivePopup(profileName: string) {
 			}
 		}
 	)
+}
+
+export async function showSettingsNeedToBeSet(settingsNeedSet: { [key: string]: any; }, profileName: string) {
+	// Disable opening workplace settings
+	// await vscode.commands.executeCommand("workbench.action.openWorkspaceSettingsFile");
+	// await vscode.commands.executeCommand("workbench.action.newGroupRight");
+	const doc = await vscode.workspace.openTextDocument({content: "// Profile '" + profileName + "' needs the following settings configured for the workspace (or all workspace folders):\n" + JSON.stringify(settingsNeedSet,null,2), language: "jsonc"});
+	await vscode.window.showTextDocument(doc);
 }

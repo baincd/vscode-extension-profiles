@@ -82,13 +82,24 @@ export function activateProfileCommand(profileName: string) {
 
 const extNotEnabled = (ext: string): boolean => !vscode.extensions.getExtension(ext);
 const extEnabled = (ext: string): boolean => !!vscode.extensions.getExtension(ext);
+function settingSetForWorkspace(settingKey: string): boolean {
+	if (vscode.workspace.getConfiguration().inspect(settingKey)?.workspaceValue !== undefined) {
+		return true;
+	} else if (!vscode.workspace.workspaceFolders) {
+		return false;
+	} else {
+		return vscode.workspace.workspaceFolders
+			.map(f => vscode.workspace.getConfiguration(undefined,f.uri).inspect(settingKey)?.workspaceFolderValue !== undefined)
+			.reduce((p,c) => p && c);
+	}
+}
 
 
-//                  exts                        disabledExts                  Notes
-// ACTIVATE         sidebar(exts.needToEnable)  popup(disExts.needToDisable)  If nothing displayed, info popup
-// STARTUP          popup(exts.needToEnable)    popup(disExts.needToDisable)
-// VIEW             sidebar(exts)               popup(disExts)
-// DEACTIVATE       (none)                      (none)                        Info Popup
+//                  exts                        disabledExts                  Settings                  Notes
+// ACTIVATE         sidebar(exts.needToEnable)  popup(disExts.needToDisable)  display(settings.notSet)  If nothing displayed, info popup
+// STARTUP          popup(exts.needToEnable)    popup(disExts.needToDisable)  popup(settings.notSet)  
+// VIEW             sidebar(exts)               popup(disExts)                display(settings)         
+// DEACTIVATE       (none)                      (none)                                                  Info Popup
 export function profileAction(profileName: string, action: ProfileAction, config: Config = configUtils.getConfig()) {
 	if (action == ProfileAction.ACTIVATE || action == ProfileAction.DEACTIVATE) {
 		let activeProfiles = config.activeProfiles;
@@ -111,12 +122,21 @@ export function profileAction(profileName: string, action: ProfileAction, config
 	const isViewAction = action == ProfileAction.VIEW;
 	let extsNeedEnabled: Array<string> = (isViewAction ? profileConfig.extensions : profileConfig.extensions.filter(extNotEnabled));
 	let extsNeedDisabled: Array<string> = (isViewAction ? profileConfig.disabledExtensions : profileConfig.disabledExtensions?.filter(extEnabled)) || [];
+	let settingsNeedSet:{ [key: string]: any; } = (isViewAction ? profileConfig.settings : filterNotSetInWorkspace(profileConfig.settings)) || {};
 
 	if (extsNeedEnabled.length) {
 		if (action == ProfileAction.STARTUP) {
 			ui.showExtsNeedEnabledPopup(extsNeedEnabled, profileName);
 		} else {
 			ui.showExtensionsSearch(extsNeedEnabled, profileName, "enable");
+		}
+	}
+
+	if (Object.keys(settingsNeedSet).length) {
+		if (action == ProfileAction.STARTUP) {
+			ui.showSettingsNeedSetPopup(settingsNeedSet, profileName);
+		} else {
+			ui.showSettingsNeedToBeSet(settingsNeedSet, profileName);
 		}
 	}
 	if (extsNeedDisabled.length) {
@@ -130,4 +150,27 @@ export function profileAction(profileName: string, action: ProfileAction, config
 
 }
 
+function filterNotSetInWorkspace(profileSettings: { [key: string]: any; } | undefined): { [key: string]: any; } | undefined {
+	if (!profileSettings) {
+		return;
+	}
+	const notSetSettings:{ [key: string]: any; } = {};
+	Object.keys(profileSettings).forEach(settingKey => {
+		if (!settingSetForWorkspace(settingKey)) {
+			notSetSettings[settingKey] = unproxy(profileSettings[settingKey]); // settings are wrapped in a Proxy, which doesn't work right with JSON.stringify, so need to unproxy value
+		}
+	})
+	return notSetSettings;
+}
 
+function unproxy(original: any): any {
+	if (typeof original != "object") {
+		return original;
+	} else {
+		const unproxied: { [key: string]: any; } = {};
+		Object.keys(original).forEach(originalKey => {
+			unproxied[originalKey] = unproxy(original[originalKey]);
+		})
+		return unproxied;
+	}
+}

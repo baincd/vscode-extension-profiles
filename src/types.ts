@@ -1,6 +1,7 @@
 export interface ProfileConfig {
 	extensions: Array<string>
 	disabledExtensions?: Array<string>,
+	settings?: {[key: string]: any},
 	temporaryProfile?: boolean
 }
 

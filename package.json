@@ -50,6 +50,10 @@
 								},
 								"description": "Array of extension IDs that should be disabled with this profile is active"
 							},
+							"settings": {
+								"type": "object",
+								"description": "Settings to set in the workspace.  Upon profile activation, will automatically set the setting as specified unless the setting already exists for the workspace [ // TODO  or on all root folders].  Existing settings will not be overwritten"
+							},
 							"temporaryProfile": {
 								"type": "boolean",
 								"default": false,
