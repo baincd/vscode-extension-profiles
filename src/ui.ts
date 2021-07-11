@@ -4,7 +4,7 @@ import * as actions from './actions'
 import { ProfileAction } from "./types";
 
 const DEFINE_PROFILE_NOW = "Define Profile Now";
-const VIEW_PROFILE = "Show Profile Extensions";
+const VIEW_PROFILE = "View Extensions in Profile";
 const DEACTIVATE_PROFILE = "Deactivate Profile";
 const ENABLE_EXTENSIONS = "Show Extensions to Enable";
 const DISABLE_EXTENSIONS = "Show Extensions to Disable";
