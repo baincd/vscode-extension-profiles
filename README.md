@@ -21,6 +21,8 @@ Additional features include:
 - View the extensions in a profile without saving the profile as active
 - Deactivate a profile in a workspace
 - Define extensions that should be disabled as part of a profile
+- Define settings that should be set on the workspace as part of a profile
+- Define profiles as temporary, so provide notification to deactivate the profile
 - Ability to create a keyboard shortcut to activate a specific profile
 
 
@@ -100,6 +102,45 @@ To configure disabled extensions:
 ```
 
 ![Disabled extensions popup example](images/example-disabled-ext-popup.png)
+
+### Workspace settings on Profiles
+
+Profiles can be configured with settings that should be set on the workspace (or on all workspace folders) when the profile is active.
+
+When profile is activated, an editor will be opened to prompt you if there are any profile settings that need to be set.  And when the workspace is opened, a popup will notify if there are any profile settings that need to be set.
+
+```jsonc
+    "extension-profiles.profiles": {
+      "Java": {
+        "extensions": [
+          "vscjava.vscode-java-pack",
+          "SonarSource.sonarlint-vscode"
+        ],
+        "settings": {
+          "sonarlint.connectedMode.project": {
+            "projectKey": "GET PROJECT KEY FROM POM" // can use value as reminder of what the value should be - it is only used in the prompt if the setting needs to be set
+          }
+        }
+      },
+    },
+```
+
+![Using Profile Settings Example](images/profile-settings-example.png)
+
+### Temporary Profiles
+
+If you have a profile you only don't always want enabled, it can be set as a temporary profile.  When the workspace is opened, if there are any temporary profiles active a popup will notify you and allow you to disable them.
+
+```jsonc
+    "FooBar": {
+        "extensions": [
+            "example.extension-i-dont-want-enabled-all-the-time"
+        ],
+        "temporaryProfile": true
+    },
+```
+
+![Temporary Profile Active Popup](images/temp-profile-active-popup.png)
 
 ### Create keyboard shortcut to directly activate a profile
 
