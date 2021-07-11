@@ -1,7 +1,7 @@
 {
 	"publisher": "baincd",
 	"name": "extension-profiles",
-	"displayName": "Extension Profiles",
+	"displayName": "Extension Profiles 3000",
 	"description": "Define sets of extensions that can quickly be enabled in workspaces via settings",
 	"version": "1.2.0",
 	"license": "MIT",
