@@ -12,7 +12,8 @@ export interface ProfilesConfig {
 export interface Config {
 	profiles: ProfilesConfig
 	activeProfiles: Array<string>
-	enableStartupCheck: boolean
+	enableStartupCheck: boolean,
+	listActiveProfilesFirst: boolean
 }
 
 export enum ProfileAction {

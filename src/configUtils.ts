@@ -7,34 +7,44 @@ export function getConfig(): Config {
 		|| {
 			activeProfiles: [],
 			enableStartupCheck: false,
+			listActiveProfilesFirst: true,
 			profiles: {}
 		};
 }
 export function getProfileRefs() {
 	const config = getConfig();
-	let profileRefs: ProfileRef[] = [];
+	const activeProfileList: string[] = config.activeProfiles.slice(0);
 
-	Object.keys(config.profiles).forEach(profileName => profileRefs.push(new ProfileRef(profileName)));
-	config.activeProfiles?.forEach(activeProfileName => {
-		let matchingProfileRef = profileRefs.find(p => p.name == activeProfileName);
-		if (matchingProfileRef) {
-			matchingProfileRef.activated = true;
-		} else {
-			const newProfileRef = new ProfileRef(activeProfileName);
-			newProfileRef.exists = false;
-			newProfileRef.activated = true;
-			profileRefs.push(newProfileRef);
-		}
+	const topList: ProfileRef[] = [];
+	const bottomList: ProfileRef[] = [];
+
+	for (const profileName in config.profiles) {
+		const isActive = findAndRemoveFromActiveProfileList(profileName);
+		(!config.listActiveProfilesFirst || isActive ? topList : bottomList).push(createProfileRef(profileName, isActive, true));
+	}
+
+	activeProfileList.forEach(profileName => {
+		topList.push(createProfileRef(profileName, true, false));
 	});
 
-	profileRefs.sort((a, b) => {
-		if (a.activated && !b.activated) {
-			return -1;
-		} else if (!a.activated && b.activated) {
-			return 1;
-		} else {
-			return a.name.localeCompare(b.name);
+	topList.push(...bottomList);
+	return topList;
+
+	function findAndRemoveFromActiveProfileList(profileName: string): boolean {
+		const idx = activeProfileList.indexOf(profileName);
+		if (idx < 0) {
+			return false;
 		}
-	});
-	return profileRefs;
+		activeProfileList.splice(idx,1);
+		return true;
+	}
+
+	function createProfileRef(name: string, isActive: boolean, exists: boolean) {
+		const profileRef = new ProfileRef(name);
+		profileRef.activated = isActive;
+		profileRef.exists = exists;
+		return profileRef;
+	}
+
+
 }

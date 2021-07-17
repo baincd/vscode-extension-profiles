@@ -81,6 +81,11 @@
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "If enabled, warn on startup about the following conditions:\n- Active profiles with extensions that need to be enabled or disabled\n- Active profiles that are not defined\n- Temporary profiles that are active"
+				},
+				"extension-profiles.listActiveProfilesFirst": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "If enabled, list active profiles first in the \"Active Profiles Setup\" quick pick list"
 				}
 			}
 		}
