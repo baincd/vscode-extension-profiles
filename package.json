@@ -62,13 +62,13 @@
 							},
 							"settings": {
 								"type": "object",
-								"description": "Settings to set in the workspace.  Upon profile activation, will automatically set the setting as specified unless the setting already exists for the workspace [ // TODO  or on all root folders].  Existing settings will not be overwritten",
+								"description": "Settings that must be set in the workspace.  At workspace startup, will automatically check these settings are set on the workspace or on all root folders.  If not, user will be prompted to set the settings.  (Value of settings are not checked, and can be used as a reminder of the value that needs to be set)",
 								"examples": [
 									{
-										"exampleExtensionSetting.example.key": "<KEY>",
+										"exampleExtensionSetting.example.key": "<KEY FROM https://foo.com/profile/api-key>",
 										"exampleExtensionSetting.complexExample": {
-											"username": "<USERNAME>",
-											"secret": "<SECRET>"
+											"username": "<USERNAME FROM BAR>",
+											"secret": "<SECRET FROM BAR>"
 										}
 									}
 								]
