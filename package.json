@@ -40,7 +40,12 @@
 									"description": "Extension ID"
 								},
 								"minItems": 1,
-								"description": "Array of extension IDs that are part of this profile"
+								"description": "Array of extension IDs that are part of this profile",
+								"examples": [
+									[
+										"example1.awesome-extension"
+									]
+								]
 							},
 							"disabledExtensions": {
 								"type": "array",
@@ -48,11 +53,25 @@
 									"type": "string",
 									"description": "Extension ID"
 								},
-								"description": "Array of extension IDs that should be disabled with this profile is active"
+								"description": "Array of extension IDs that should be disabled with this profile is active",
+								"examples": [
+									[
+										"example.no-so-awesome-extension"
+									]
+								]
 							},
 							"settings": {
 								"type": "object",
-								"description": "Settings to set in the workspace.  Upon profile activation, will automatically set the setting as specified unless the setting already exists for the workspace [ // TODO  or on all root folders].  Existing settings will not be overwritten"
+								"description": "Settings to set in the workspace.  Upon profile activation, will automatically set the setting as specified unless the setting already exists for the workspace [ // TODO  or on all root folders].  Existing settings will not be overwritten",
+								"examples": [
+									{
+										"exampleExtensionSetting.example.key": "<KEY>",
+										"exampleExtensionSetting.complexExample": {
+											"username": "<USERNAME>",
+											"secret": "<SECRET>"
+										}
+									}
+								]
 							},
 							"temporaryProfile": {
 								"type": "boolean",
@@ -60,13 +79,38 @@
 								"description": "Temporary profiles are for extensions you want to only enable temporarily.  When a workspace is opened, a warning popup will be displayed for any temporary profiles that are active"
 							}
 						},
+						"additionalProperties": false,
 						"required": [
 							"extensions"
 						],
-						"description": "Extension Profile name"
+						"description": "Extension Profile name",
+						"examples": [
+							{
+								"extensions": [
+									"example1.awesome-extension",
+									"example2.ok-extension"
+								]
+							}
+						]
 					},
 					"default": {},
-					"description": "Extension Profiles configuration"
+					"description": "Extension Profiles configuration",
+					"examples": [
+						{
+							"example-profile-1": {
+								"extensions": [
+									"example1.awesome-extension",
+									"example2.ok-extension"
+								]
+							},
+							"example-profile-2": {
+								"extensions": [
+									"example1.awesome-extension",
+									"example2.ok-extension"
+								]
+							}
+						}
+					]
 				},
 				"extension-profiles.activeProfiles": {
 					"type": "array",
